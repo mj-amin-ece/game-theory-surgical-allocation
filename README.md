@@ -1,31 +1,64 @@
-# Game Theory Project: Surgical Procedure Allocation
+# Surgical Request Allocation with Deferred Acceptance
 
-In this project, we address the allocation of surgical procedures in medical centers a, b, and c, each offering three types of surgeries: A, B, and C. We assume that the time required for surgeries at these medical centers follows a Gaussian random variable with means of 10, 5, and 2 hours, respectively, under normal surgery rates. Since different surgeons perform different types of surgeries at medical centers, the time and cost of procedures vary. Additionally, the arrival rates of each type of surgery at the medical centers differ, with requests following Poisson distributions.
+**A game-theoretic matching of patients to hospitals. The project simulates Poisson-arriving surgery requests and assigns them to three medical centers with the Deferred Acceptance (Gale–Shapley) algorithm, with and without letting requests wait.**
 
-Requests are queued, and the DA algorithm is used to allocate surgical requests to medical centers. In the first step, requests cannot be delayed, but in the second step, requests can delay their turn up to K times if they do not receive immediate attention.
+![Python](https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white)
+![NumPy](https://img.shields.io/badge/NumPy-013243?logo=numpy&logoColor=white)
+![Topic](https://img.shields.io/badge/topic-matching%20markets-6f42c1)
 
-This project is implemented in Python.
+## Problem
 
-## Approach
+Three medical centers (*a*, *b*, *c*) each perform three surgery types (*A*, *B*, *C*).
 
-1. **Input Generation**: Generate surgical request data considering the arrival rates and types of surgeries at each medical center.
-2. **DA Algorithm Implementation**: Implement the DA algorithm for surgical procedure allocation to medical centers.
-3. **Simulation**: Simulate the allocation process considering the constraints and parameters of the problem.
-4. **Performance Evaluation**: Evaluate the performance of the allocation algorithm in terms of efficiency and fairness.
-5. **Parameter Tuning**: Tune parameters such as the maximum delay allowance (K) to optimize the allocation process.
-6. **Results Analysis**: Analyze the results to identify any patterns or areas for improvement.
+- **Service times** are random with means of 2, 5 and 10 hours by type. Each center operates at a different rate multiplier (1, 1/2, 1/3) for each surgery, so the same operation can take up to three times longer elsewhere.
+- **Preferences conflict.** Patients rank centers by *shorter completion time*. Centers rank requests by *higher fee* (2, 7 and 5 units, permuted across centers).
+- **Arrivals** of types *A*, *B* and *C* follow independent Poisson processes with rates 0.20, 0.10 and 0.05 per hour.
+- **Matching** runs once per 8-hour slot on a single shared queue with Deferred Acceptance.
 
-## Implementation Details
+The project studies two settings:
 
-- Python scripts for data generation, algorithm implementation, and simulation.
-- Detailed comments and documentation within the code to explain the logic and functionality.
-- Usage instructions and examples provided to facilitate easy understanding and usage of the project.
+1. **No waiting.** A request that is not matched in its slot is lost.
+2. **Waiting allowed.** A request may pass up to *K* slots (`pass_slot`) to hold out for a better center.
 
-## Contact
+The full statement is in [`docs/problem-statement.pdf`](docs/problem-statement.pdf), and the results are in [`docs/report-fa.pdf`](docs/report-fa.pdf) (Persian).
 
-For any questions or inquiries, please contact:
+## Results
 
-Mohammad Javad Amin
-- M.j.amin200@gamil.com
+Simulation over 200,000 slots with `pass_slot = 5`:
 
-We hope you find this project insightful and useful for understanding surgical procedure allocation in medical centers using game theory principles. Happy coding!
+![Average waiting time and queue length over 200,000 slots](results/queue-200000-slots.png)
+
+The average waiting time settles at about 15 slots. The queue length stays bounded at around 20–60 requests, peaking at about 120, so the system stays stable at these arrival rates.
+
+## Repository structure
+
+```text
+.
+├── src/
+│   └── simulate_allocation.py   # arrivals, preference lists, DA matching, metrics and plots
+├── results/
+│   └── queue-200000-slots.png
+└── docs/
+    ├── problem-statement.pdf
+    ├── project-brief.pdf
+    └── report-fa.pdf
+```
+
+## Running
+
+```bash
+cd src
+pip install numpy matplotlib
+python simulate_allocation.py
+```
+
+The inputs (`Num_slot_list`, `pass_slot` and the Poisson rates) are at the top of the script.
+The script writes its figure and log to the current folder, and it **deletes any existing `.txt` and `.png` files there first**, so run it from `src/`.
+
+## Context
+
+Course project for *Game Theory*, M.Sc. at Sharif University of Technology.
+
+## Author
+
+**Mohammad Javad Amin** · [GitHub](https://github.com/mj-amin-ece)
